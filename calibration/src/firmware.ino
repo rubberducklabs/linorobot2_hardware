@@ -103,7 +103,7 @@ void sampleMotors(bool show_summary)
     float scaled_max_rpm = ((measured_voltage / MOTOR_OPERATING_VOLTAGE) * MOTOR_MAX_RPM);
     float total_rev = scaled_max_rpm * (SAMPLE_TIME / 60.0);
 
-    for(int i=0; i<total_motors; i++)
+    for (int i = 0; i < 2; i++)
     {
         Serial.print("SPINNING ");
         Serial.print(labels[i]);

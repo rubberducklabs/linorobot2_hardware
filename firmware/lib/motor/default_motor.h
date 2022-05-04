@@ -79,13 +79,15 @@ class Generic1: public MotorInterface
         void forward(int pwm) override
         {
             digitalWrite(in_pin_, HIGH);
-            analogWrite(pwm_pin_, abs(pwm));
+            analogWriteFrequency(pwm_pin_, abs(pwm));
+            analogWrite(pwm_pin_, 128);
         }
 
         void reverse(int pwm) override
         {
             digitalWrite(in_pin_, LOW);
-            analogWrite(pwm_pin_, abs(pwm));
+            analogWriteFrequency(pwm_pin_, abs(pwm));
+            analogWrite(pwm_pin_, 128);
         }
 
     public:

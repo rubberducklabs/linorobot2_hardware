@@ -119,7 +119,7 @@ class MPU6050IMU: public IMUInterface
 
         bool startSensor() override
         {
-            Wire.begin();
+            Wire2.begin();
             bool ret;
             accelerometer_.initialize();
             ret = accelerometer_.testConnection();

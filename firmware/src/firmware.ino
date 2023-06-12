@@ -39,11 +39,11 @@
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
 rcl_publisher_t odom_publisher;
-// rcl_publisher_t imu_publisher;
+rcl_publisher_t imu_publisher;
 rcl_subscription_t twist_subscriber;
 
 nav_msgs__msg__Odometry odom_msg;
-// sensor_msgs__msg__Imu imu_msg;
+sensor_msgs__msg__Imu imu_msg;
 geometry_msgs__msg__Twist twist_msg;
 
 rclc_executor_t executor;
@@ -83,20 +83,20 @@ Kinematics kinematics(
 );
 
 Odometry odometry;
-// IMU imu;
+IMU imu;
 
 void setup() 
 {
     pinMode(LED_PIN, OUTPUT);
 
-    /*  bool imu_ok = imu.init();
-     if(!imu_ok)
-     {
-         while(1)
-         {
-             flashLED(3);
-         }
-     } */
+    bool imu_ok = imu.init();
+    if (!imu_ok)
+    {
+        while (1)
+        {
+            flashLED(3);
+        }
+    }
 
     micro_ros_init_successful = false;
     set_microros_transports();
@@ -165,12 +165,11 @@ void createEntities()
         "odom/unfiltered"
     ));
     // create IMU publisher
-    /* RCCHECK(rclc_publisher_init_default(
+    RCCHECK(rclc_publisher_init_default(
         &imu_publisher,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu),
-        "imu/data"
-    )); */
+        "imu/data"));
     // create twist command subscriber
     RCCHECK(rclc_subscription_init_default( 
         &twist_subscriber, 
@@ -207,7 +206,7 @@ void destroyEntities()
     digitalWrite(LED_PIN, LOW);
 
     rcl_publisher_fini(&odom_publisher, &node);
-    // rcl_publisher_fini(&imu_publisher, &node);
+    rcl_publisher_fini(&imu_publisher, &node);
     rcl_subscription_fini(&twist_subscriber, &node);
     rcl_node_fini(&node);
     rcl_timer_fini(&control_timer);
@@ -255,16 +254,16 @@ void moveBase()
 
     // the required rpm is capped at -/+ MAX_RPM to prevent the PID from having too much error
     // the PWM value sent to the motor driver is the calculated PID based on required RPM vs measured RPM
-    motor1_controller.spin(req_rpm.motor1 * 50);
-    motor2_controller.spin(req_rpm.motor2 * 50);
-    motor3_controller.spin(req_rpm.motor3 * 50);
-    motor4_controller.spin(req_rpm.motor4 * 50);
+    motor1_controller.spin(req_rpm.motor1 * 10);
+    motor2_controller.spin(req_rpm.motor2 * 10);
+    motor3_controller.spin(req_rpm.motor3 * 10);
+    motor4_controller.spin(req_rpm.motor4 * 10);
 
     Kinematics::velocities current_vel = kinematics.getVelocities(
-        req_rpm.motor1 * 50,
-        req_rpm.motor2 * 50,
-        req_rpm.motor3 * 50,
-        req_rpm.motor4 * 50);
+        req_rpm.motor1 * 10,
+        req_rpm.motor2 * 10,
+        req_rpm.motor3 * 10,
+        req_rpm.motor4 * 10);
 
     unsigned long now = millis();
     float vel_dt = (now - prev_odom_update) / 1000.0;
@@ -280,17 +279,17 @@ void moveBase()
 void publishData()
 {
     odom_msg = odometry.getData();
-    // imu_msg = imu.getData();
+    imu_msg = imu.getData();
 
     struct timespec time_stamp = getTime();
 
     odom_msg.header.stamp.sec = time_stamp.tv_sec;
     odom_msg.header.stamp.nanosec = time_stamp.tv_nsec;
 
-    // imu_msg.header.stamp.sec = time_stamp.tv_sec;
-    // imu_msg.header.stamp.nanosec = time_stamp.tv_nsec;
+    imu_msg.header.stamp.sec = time_stamp.tv_sec;
+    imu_msg.header.stamp.nanosec = time_stamp.tv_nsec;
 
-    // RCSOFTCHECK(rcl_publish(&imu_publisher, &imu_msg, NULL));
+    RCSOFTCHECK(rcl_publish(&imu_publisher, &imu_msg, NULL));
     RCSOFTCHECK(rcl_publish(&odom_publisher, &odom_msg, NULL));
 }
 

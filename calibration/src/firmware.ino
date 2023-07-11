@@ -11,6 +11,7 @@ int dirPins[4] = {MOTOR1_IN_B, MOTOR2_IN_B, MOTOR3_IN_B, MOTOR4_IN_B};
 // Calibration status and pulse count
 bool calibrating = false;
 int pulses = 0;
+String commandBuffer = "";
 
 void setup()
 {
@@ -27,16 +28,24 @@ void setup()
 void loop()
 {
     if (Serial.available()) {
-        String command = Serial.readStringUntil('\n');
-        command.trim();
-        if (command == "calibrate") {
-            startCalibration();
-        }
-        else if (command == "stop") {
-            stopCalibration();
+        char inChar = (char)Serial.read();
+        commandBuffer += inChar;
+        if (inChar == '\n') {
+            processCommand(commandBuffer);
+            commandBuffer = "";
         }
     }
     spinMotor();
+}
+
+void processCommand(String command) {
+    command.trim();
+    if (command == "calibrate") {
+        startCalibration();
+    }
+    else if (command == "stop") {
+        stopCalibration();
+    }
 }
 
 void startCalibration() {

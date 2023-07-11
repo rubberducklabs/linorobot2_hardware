@@ -29,6 +29,7 @@ void loop()
 {
     if (Serial.available()) {
         char inChar = (char)Serial.read();
+        Serial.print(inChar);
         commandBuffer += inChar;
         if (inChar == '\n') {
             processCommand(commandBuffer);

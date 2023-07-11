@@ -30,10 +30,12 @@ void loop()
     if (Serial.available()) {
         char inChar = (char)Serial.read();
         Serial.print(inChar);
-        commandBuffer += inChar;
-        if (inChar == '\r') {
+        if (inChar == '\r' || inChar == '\n') {
+            Serial.println("");
             processCommand(commandBuffer);
             commandBuffer = "";
+        }else{
+            commandBuffer += inChar;
         }
     }
     spinMotor();
@@ -50,6 +52,7 @@ void processCommand(String command) {
 }
 
 void startCalibration() {
+    Serial.println("Start Calibration");
     calibrating = true;
     pulses = 0;
 }

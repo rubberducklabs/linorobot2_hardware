@@ -31,7 +31,7 @@ void loop()
         char inChar = (char)Serial.read();
         Serial.print(inChar);
         commandBuffer += inChar;
-        if (inChar == '\n') {
+        if (inChar == '\r') {
             processCommand(commandBuffer);
             commandBuffer = "";
         }
